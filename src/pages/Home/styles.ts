@@ -64,7 +64,10 @@ export const Header = styled.div`
       content: '|';
       text-align: center;
       display: inline-block;
-      padding: 0 24px 0 16px;
+      padding: 0 15px 0 10px;
+      @media (min-width: 600px) {
+        padding: 0 30px 0 20px;
+      }
       color: #5c5c5c;
     }
   }
@@ -171,13 +174,13 @@ export const Jobs = styled.div`
   flex-direction: column;
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  @media (min-width: 660px) {
+  grid-template-columns: 1fr;
+  @media (min-width: 560px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (min-width: 801px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
-  grid-template-rows: 1fr 1fr;
-  height: 100vh;
-
   margin: 50px 0;
 `;
 
@@ -236,13 +239,10 @@ export const ItemContact = styled.div`
   align-items: center;
   flex-direction: column;
   max-width: 300px;
-  margin: 5px 30px;
+  margin: 0px 5px;
 
   svg {
-    font-size: 20px;
-    @media (min-width: 600px) {
-      font-size: 30px;
-    }
+    font-size: 30px;
     @media (min-width: 701px) {
       font-size: 35px;
     }

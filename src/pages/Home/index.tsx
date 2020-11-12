@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   FaFacebookF,
   FaInstagram,
@@ -24,11 +24,22 @@ import {
 } from './styles';
 
 import Jogo from '../../components/Jogo';
+import Messages from '../../components/Messages';
+import { MessageProps } from '../../components/Messages/Message';
 
 import imgProfile from '../../assets/profile.jpg';
 
+import { getMessages } from '../../services/api';
+
 const Home: React.FC = () => {
   const [game, showGame] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+
+  useEffect(() => {
+    getMessages().then(data => {
+      setMessages(data);
+    });
+  }, []);
 
   return (
     <>
@@ -122,8 +133,6 @@ const Home: React.FC = () => {
                 Em Brasília, DF
                 <br />
                 Brasil
-                <br />
-                Terra
               </p>
             </ItemContact>
             <ItemContact>
@@ -145,6 +154,9 @@ const Home: React.FC = () => {
               </p>
             </ItemContact>
           </Contacts>
+
+          <Messages messages={messages} />
+
           <p>
             © Designed by <a href="mailto: micpopolin@gmail.com">Popolin</a>.
           </p>

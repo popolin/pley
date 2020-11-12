@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  width: 80%;
+  width: 92%;
 `;
 
 export const Title = styled.div`

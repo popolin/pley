@@ -103,7 +103,7 @@ const Home: React.FC = () => {
               <FaTheaterMasks />
               <h3>Teatro</h3>
               <p>
-                Hobby desenvolvido a partir de origens familiares e desejo de
+                Hobby desenvolvido a partir de origens familiares e do desejo de
                 fazer as pessoas sorrirem. Participei de treinamentos para
                 compreensão de tempo de fala, oratória, posicionamento em palco
                 e técnicas de Rapport na escola{' '}

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 import { FaTimes } from 'react-icons/fa';
 

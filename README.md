@@ -4,7 +4,7 @@
   <img alt="Proffy" src="https://popolin.s3-sa-east-1.amazonaws.com/site/logo.png" width="250px">
 </p>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/869ca28c-d6f3-4d2e-b9a5-448a51f5fabe/deploy-status)](https://app.netlify.com/sites/gallant-curie-63e4a4/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a6b417e5-ab58-4671-b529-20ae38140af4/deploy-status)](https://app.netlify.com/sites/sleepy-brahmagupta-7433b0/deploys)
 
 ## NextJS example (React JS + Next.js)
 

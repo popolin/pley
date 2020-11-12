@@ -14,7 +14,8 @@ export const Container = styled.div`
   overflow: hidden;
   left: 50%;
   transform: translateX(-50%);
-  width: 700px;
+  width: 80%;
+  height: 70%;
   top: 20%;
   background: #0a0a0a;
   border: solid #010101;
@@ -23,17 +24,44 @@ export const Container = styled.div`
 
   h4 {
     text-align: left;
+    font-size: 18px;
+    @media (min-width: 600px) {
+      font-size: 20px;
+    }
+    @media (min-width: 701px) {
+      font-size: 22px;
+    }
+    @media (min-width: 901px) {
+      height: 24px;
+    }
   }
 
   h1 {
     margin-bottom: 30px;
+    font-size: 18px;
+    @media (min-width: 600px) {
+      font-size: 20px;
+    }
+    @media (min-width: 701px) {
+      font-size: 22px;
+    }
+    @media (min-width: 901px) {
+      height: 24px;
+    }
   }
 
   footer {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 16px;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+
+    span {
+      display: flex;
+      align-items: flex-end;
+      flex-direction: row;
+      margin-right: 50px;
+      justify-content: space-between;
+    }
 
     div {
       button {

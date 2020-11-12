@@ -151,31 +151,33 @@ const Jogo: React.FC<JogoProps> = ({ onClose }) => {
               <h4>
                 Pense em qualquer personagem: real, fictício, vivo, morto,
                 desenho animado... Qualquer um.
+                <br />
+                Agora decore seu personagem e clique em Continuar:
               </h4>
-              <h4>Agora decore seu personagem e clique em Continuar:</h4>
-              <br />
             </>
           )}
 
           <footer>
-            <Button theme="dark" onClick={() => handleClose()}>
-              Fechar
-            </Button>
-            {!!aki && !!guess && (
-              <div>
-                <Button theme="error" onClick={handleErrou}>
-                  Não
-                </Button>
-                <Button theme="success" onClick={handleClose}>
-                  Sim!
-                </Button>
-              </div>
-            )}
-            {!aki ? (
-              <Button onClick={handleContinuar}>Continuar</Button>
-            ) : (
-              <></>
-            )}
+            <span>
+              <Button theme="dark" onClick={() => handleClose()}>
+                Fechar
+              </Button>
+              {!!aki && !!guess && (
+                <div>
+                  <Button theme="error" onClick={handleErrou}>
+                    Não
+                  </Button>
+                  <Button theme="success" onClick={handleClose}>
+                    Sim!
+                  </Button>
+                </div>
+              )}
+              {!aki ? (
+                <Button onClick={handleContinuar}>Continuar</Button>
+              ) : (
+                <></>
+              )}
+            </span>
           </footer>
         </div>
       </Container>

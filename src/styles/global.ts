@@ -36,7 +36,7 @@ export default createGlobalStyle`
   }
 
   h4 {
-    margin-top: 20px;
+    margin: 10px 20px;
     font-family: lora sans-serif;
     color: #888888;
     font-weight: 200;
@@ -49,7 +49,11 @@ export default createGlobalStyle`
 
   h5 {
     letter-spacing: .15rem;
-    font-size: 22px;
+    font-size: 18px;
+    @media (min-width: 600px) {
+      font-size: 22px;
+    }
+
     color: #cc005f;
   }
   button {

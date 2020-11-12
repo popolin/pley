@@ -18,6 +18,7 @@ import {
   Footer,
   Jobs,
   Item,
+  Contacts,
   ItemContact,
   Topo,
 } from './styles';
@@ -113,7 +114,7 @@ const Home: React.FC = () => {
               </p>
             </Item>
           </Jobs>
-          <Jobs>
+          <Contacts>
             <ItemContact>
               <FaMapPin />
               <h3>Onde estou?</h3>
@@ -143,9 +144,9 @@ const Home: React.FC = () => {
                 <a href="tel: 5561992727799">(61) 9 9272-7799</a>
               </p>
             </ItemContact>
-          </Jobs>
+          </Contacts>
           <p>
-            © Designed by <a href="http://www.popolin.com.br">Popolin</a>.
+            © Designed by <a href="mailto: micpopolin@gmail.com">Popolin</a>.
           </p>
         </Footer>
       </Container>

@@ -21,16 +21,42 @@ export const Header = styled.div`
   padding-top: 150px;
 
   h1 {
-    font-size: 70px;
+    @media (min-width: 600px) {
+      font-size: 40px;
+    }
+    @media (min-width: 701px) {
+      font-size: 50px;
+    }
+    @media (min-width: 901px) {
+      font-size: 70px;
+    }
   }
 
   h2 {
-    font-size: 35px;
+    font-size: 20px;
+    @media (min-width: 600px) {
+      font-size: 24px;
+    }
+    @media (min-width: 701px) {
+      font-size: 30px;
+    }
+    @media (min-width: 901px) {
+      font-size: 35px;
+    }
     margin-top: 10px;
   }
 
   span {
-    font-size: 22px;
+    font-size: 12px;
+    @media (min-width: 600px) {
+      font-size: 16px;
+    }
+    @media (min-width: 701px) {
+      font-size: 18px;
+    }
+    @media (min-width: 901px) {
+      font-size: 24px;
+    }
     margin: 0 10px;
 
     &::before,
@@ -38,7 +64,7 @@ export const Header = styled.div`
       content: '|';
       text-align: center;
       display: inline-block;
-      padding: 0 30px 0 20px;
+      padding: 0 24px 0 16px;
       color: #5c5c5c;
     }
   }
@@ -103,6 +129,7 @@ export const Footer = styled(Header)`
     text-align: left;
     width: 100%;
     margin-bottom: 20px;
+    margin-left: 20px;
     color: #6e6e6e;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
@@ -118,10 +145,20 @@ export const Topo = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  margin: 0 13px;
 
   img {
     width: auto;
-    height: 120px;
+    height: 80px;
+    @media (min-width: 600px) {
+      height: 90px;
+    }
+    @media (min-width: 701px) {
+      height: 110px;
+    }
+    @media (min-width: 901px) {
+      height: 120px;
+    }
     border-radius: 50%;
   }
 
@@ -131,8 +168,16 @@ export const Topo = styled.div`
 `;
 
 export const Jobs = styled.div`
-  display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  @media (min-width: 660px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  grid-template-rows: 1fr 1fr;
+  height: 100vh;
+
   margin: 50px 0;
 `;
 
@@ -140,11 +185,20 @@ export const Item = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  width: 300px;
-  margin: 0 30px;
+  max-width: 300px;
+  margin: 5px 30px;
 
   svg {
-    font-size: 60px;
+    font-size: 40px;
+    @media (min-width: 600px) {
+      font-size: 45px;
+    }
+    @media (min-width: 701px) {
+      font-size: 50px;
+    }
+    @media (min-width: 901px) {
+      font-size: 60px;
+    }
     color: #cc005f;
   }
 
@@ -157,6 +211,10 @@ export const Item = styled.div`
   p {
     margin-top: 20px;
     color: #bfbfbf;
+    font-size: 16px;
+    @media (min-width: 701px) {
+      font-size: 22px;
+    }
 
     a {
       text-decoration: none;
@@ -166,20 +224,46 @@ export const Item = styled.div`
   }
 `;
 
+export const Contacts = styled(Jobs)`
+  grid-template-columns: 1fr 1fr 1fr;
+  /* @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  } */
+`;
+
 export const ItemContact = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  width: 300px;
-  margin: 0 30px;
+  max-width: 300px;
+  margin: 5px 30px;
 
   svg {
-    font-size: 40px;
+    font-size: 20px;
+    @media (min-width: 600px) {
+      font-size: 30px;
+    }
+    @media (min-width: 701px) {
+      font-size: 35px;
+    }
+    @media (min-width: 901px) {
+      font-size: 40px;
+    }
     color: #fff;
   }
 
   h3 {
     margin-top: 15px;
+    font-size: 12px;
+    @media (min-width: 600px) {
+      font-size: 16px;
+    }
+    @media (min-width: 701px) {
+      font-size: 18px;
+    }
+    @media (min-width: 901px) {
+      font-size: 22px;
+    }
     color: #cc005f;
     text-transform: none;
   }
@@ -188,7 +272,16 @@ export const ItemContact = styled.div`
     margin-top: 20px;
     color: #6e6e6e;
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
+    font-size: 10px;
+    @media (min-width: 600px) {
+      font-size: 12px;
+    }
+    @media (min-width: 701px) {
+      font-size: 14px;
+    }
+    @media (min-width: 901px) {
+      font-size: 16px;
+    }
     font-weight: 400;
     line-height: 1.6;
 

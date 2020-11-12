@@ -50,7 +50,10 @@ export const Header = styled.div`
   }
 
   span {
-    font-size: 12px;
+    font-size: 10px;
+    @media (min-width: 400px) {
+      font-size: 12px;
+    }
     @media (min-width: 600px) {
       font-size: 16px;
     }

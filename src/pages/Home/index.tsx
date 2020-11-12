@@ -135,7 +135,7 @@ const Home: React.FC = () => {
                 Brasil
               </p>
             </ItemContact>
-            <ItemContact>
+            <ItemContact href="mailto: farmazil.vendas@gmail.com">
               <FaRegEnvelope />
               <h3>Email me</h3>
               <p>
@@ -146,7 +146,7 @@ const Home: React.FC = () => {
                 </a>
               </p>
             </ItemContact>
-            <ItemContact>
+            <ItemContact href="tel: 5561992727799">
               <FaPhoneAlt />
               <h3>Zap me</h3>
               <p>

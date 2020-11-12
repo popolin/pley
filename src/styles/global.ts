@@ -49,7 +49,10 @@ export default createGlobalStyle`
 
   h5 {
     letter-spacing: .15rem;
-    font-size: 18px;
+    font-size: 14px;
+    @media (min-width: 400px) {
+      font-size: 16px;
+    }
     @media (min-width: 600px) {
       font-size: 22px;
     }

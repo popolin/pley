@@ -33,7 +33,10 @@ export const Header = styled.div`
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 16px;
+    @media (min-width: 400px) {
+      font-size: 20px;
+    }
     @media (min-width: 600px) {
       font-size: 24px;
     }
@@ -237,12 +240,13 @@ export const Contacts = styled(Jobs)`
   } */
 `;
 
-export const ItemContact = styled.div`
+export const ItemContact = styled.a`
   display: flex;
   align-items: center;
   flex-direction: column;
   max-width: 300px;
   margin: 0px 5px;
+  text-decoration: none;
 
   svg {
     font-size: 30px;

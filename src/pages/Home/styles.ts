@@ -67,7 +67,7 @@ export const Header = styled.div`
       content: '|';
       text-align: center;
       display: inline-block;
-      padding: 0 12px 0 8px;
+      padding: 0 19px 0 6px;
       @media (min-width: 400px) {
         padding: 0 15px 0 10px;
       }

@@ -6,6 +6,8 @@ import { FaTimes } from 'react-icons/fa';
 
 import { Container } from './styles';
 
+type SelectFunctionType = (message: MessageProps) => void;
+
 export interface MessageProps {
   id: string;
   from: string;
@@ -16,14 +18,19 @@ export interface MessageProps {
 interface RequestProps {
   dark?: boolean;
   message: MessageProps;
+  onDelete: SelectFunctionType;
 }
 
-const Message: React.FC<RequestProps> = ({ dark = false, message }) => {
+const Message: React.FC<RequestProps> = ({
+  dark = false,
+  message,
+  onDelete,
+}) => {
   const date = new Date(message.created_at);
 
   const handleRemoveMessage = useCallback(() => {
-    console.log(`Remove ${message.id}`);
-  }, [message]);
+    onDelete(message);
+  }, [message, onDelete]);
 
   return (
     <Container dark={dark}>

@@ -49,6 +49,10 @@ export const Header = styled.div`
     margin-top: 10px;
   }
 
+  ol {
+    margin-bottom: 40px;
+  }
+
   span {
     font-size: 10px;
     @media (min-width: 400px) {
@@ -92,7 +96,6 @@ export const Header = styled.div`
     border: solid 3px #5c5c5c;
     line-height: 55px;
     padding: 0 30px;
-    margin-top: 40px;
     font-size: 16px;
     font-weight: 600;
     transition: border-color 0.4s;

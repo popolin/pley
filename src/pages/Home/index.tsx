@@ -29,17 +29,8 @@ import { MessageProps } from '../../components/Messages/Message';
 
 import imgProfile from '../../assets/profile.jpg';
 
-import { getMessages } from '../../services/api';
-
 const Home: React.FC = () => {
   const [game, showGame] = useState(false);
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-
-  useEffect(() => {
-    getMessages().then(data => {
-      setMessages(data);
-    });
-  }, []);
 
   return (
     <>
@@ -48,11 +39,11 @@ const Home: React.FC = () => {
         <Header>
           <h5>Born to be alive.</h5>
           <h1>Marcílio Mendes Pley.</h1>
-          <div>
+          <ol>
             <span>Vendas</span>
             <span>Treinamento</span>
             <span>Humor</span>
-          </div>
+          </ol>
           <button type="button" onClick={() => showGame(true)}>
             Jogo dos personagens
             <FaGamepad />
@@ -155,7 +146,7 @@ const Home: React.FC = () => {
             </ItemContact>
           </Contacts>
 
-          <Messages messages={messages} />
+          <Messages />
 
           <p>
             © Designed by <a href="mailto: micpopolin@gmail.com">Popolin</a>.

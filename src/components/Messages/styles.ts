@@ -5,13 +5,17 @@ export const Container = styled.div`
 `;
 
 export const Title = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   background: #2c2c2c;
-  padding: 7px;
+  padding: 16px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 
   h3 {
-    color: #ffffff;
+    color: #b8b8b8;
     font-size: 16px;
     @media (min-width: 600px) {
       font-size: 18px;

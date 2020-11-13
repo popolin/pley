@@ -8,11 +8,11 @@ interface MessageProps {
 export const Container = styled.div<MessageProps>`
   padding: 5px 10px;
   margin: 20, 0px;
-  background: #f4f8fb;
+  background: #6e6e6e;
   ${props =>
     props.dark &&
     css`
-      background: #edeff4;
+      background: #636363;
     `}
 
   div {
@@ -22,7 +22,8 @@ export const Container = styled.div<MessageProps>`
     justify-content: space-between;
 
     h3 {
-      color: #8694a6;
+      font-family: 'Shadows Into Light', cursive;
+      color: #151515;
       font-size: 14px;
       @media (min-width: 600px) {
         font-size: 16px;
@@ -34,7 +35,8 @@ export const Container = styled.div<MessageProps>`
 
     div {
       h6 {
-        color: #c4ccd4;
+        font-family: 'Poppins', sans-serif;
+        color: #b8b8b8;
         font-size: 12px;
         @media (min-width: 600px) {
           font-size: 14px;
@@ -48,11 +50,11 @@ export const Container = styled.div<MessageProps>`
         margin: 0;
         border: 0;
         padding: 0;
-        color: #bd1c2b;
+        color: #cc005f;
         width: 30px;
         height: 30px;
         &:hover {
-          color: ${shade(0.8, '#bd1c2b')};
+          color: ${shade(0.8, '#cc005f')};
         }
 
         svg {
@@ -71,7 +73,8 @@ export const Container = styled.div<MessageProps>`
   p {
     text-align: left;
     margin-top: 2px;
-    color: #a3abb6;
+    color: #2c2c2c;
+    font-family: 'Poppins', sans-serif;
     font-size: 14px;
     @media (min-width: 600px) {
       font-size: 16px;

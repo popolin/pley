@@ -67,14 +67,16 @@ export const Header = styled.div`
 
     &::before,
     &:last-of-type::after {
-      content: '|';
+      content: '';
       text-align: center;
       display: inline-block;
-      padding: 0 19px 0 6px;
+      padding: 0;
       @media (min-width: 400px) {
+        content: '|';
         padding: 0 15px 0 10px;
       }
       @media (min-width: 600px) {
+        content: '|';
         padding: 0 30px 0 20px;
       }
       color: #5c5c5c;

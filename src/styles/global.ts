@@ -1,7 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 
 export default createGlobalStyle`
-  * {
+  /* * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -63,5 +63,5 @@ export default createGlobalStyle`
     cursor: pointer;
     letter-spacing: 0.15rem;
     text-transform: uppercase;
-  }
+  } */
 `;

@@ -158,6 +158,14 @@ const Recibo: React.FC = () => {
         </ItemForm>
       </Content>
       <Divider />
+      <Text
+        type="secondary"
+        style={{
+          marginBottom: 16,
+        }}
+      >
+        Clique na imagem abaixo para fazer o download do recibo:
+      </Text>
       <ImagemRecibo ref={ref} onClick={handleDownload}>
         <Image
           preview={false}

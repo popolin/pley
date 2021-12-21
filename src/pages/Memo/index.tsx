@@ -77,6 +77,7 @@ const Memo: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log('pathname', pathname);
     if (pathname) {
       handleShowGroup(pathname.substring(1));
     }

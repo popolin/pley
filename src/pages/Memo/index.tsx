@@ -1,13 +1,16 @@
+/* eslint-disable default-case */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router';
 
 import { Button, notification } from 'antd';
 import { shuffle } from 'lodash';
 
 import Rua from './images/rua';
 import Jovens from './images/jovens';
+import Lemos from './images/lemos';
 
 import {
   Container,
@@ -22,21 +25,32 @@ import { IImage } from './images/imageDTO';
 
 interface IGroup {
   name: string;
+  key: string;
   group: IImage[];
 }
 
 const allGroups = [
   {
     name: 'Das antigas',
+    key: 'antigas',
     group: Rua,
   },
   {
     name: 'Jovens Mendes',
+    key: 'jovens',
     group: Jovens,
+  },
+  {
+    name: 'Família Lemos',
+    key: 'lemos',
+    group: Lemos,
   },
 ] as IGroup[];
 
 const Memo: React.FC = () => {
+  const { pathname } = useLocation();
+  const history = useHistory();
+
   const [cards, setCards] = useState<string[]>([]);
   const [clicks, setClicks] = useState(0);
   const [won, setWon] = useState(false);
@@ -44,14 +58,29 @@ const Memo: React.FC = () => {
   const [foundPairs, setFoundPairs] = useState<number[]>([]);
   const [group, setGroup] = useState<IGroup>();
 
-  const handleSelectGroup = useCallback((name: string) => {
-    const selected = allGroups.find(ag => ag.name === name);
+  const handleSelectGroup = useCallback(
+    (path: string) => {
+      history.push({
+        pathname: path,
+      });
+    },
+    [history],
+  );
+
+  const handleShowGroup = useCallback((name: string) => {
+    const selected = allGroups.find(ag => ag.key === name);
     if (selected) {
       setGroup(selected);
       const images = selected.group.map(a => a.image);
       setCards(shuffle([...images, ...images]));
     }
   }, []);
+
+  useEffect(() => {
+    if (pathname) {
+      handleShowGroup(pathname.substring(1));
+    }
+  }, [handleShowGroup, pathname]);
 
   const flipCard = useCallback(
     (index: number) => {
@@ -117,7 +146,7 @@ const Memo: React.FC = () => {
                 style={{
                   marginBottom: 12,
                 }}
-                onClick={() => handleSelectGroup(ag.name)}
+                onClick={() => handleSelectGroup(ag.key)}
               >
                 {ag.name}
               </Button>

@@ -9,7 +9,7 @@ import MemoPage from '../pages/Memo';
 const Routes: React.FC = () => (
   <Switch>
     <Route path="/receipt" component={ReciboPage} />
-    <Route path="*" component={MemoPage} />
+    <Route component={MemoPage} />
   </Switch>
 );
 

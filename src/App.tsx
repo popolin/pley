@@ -5,13 +5,14 @@ import GlobalStyle from './styles/global';
 
 // import Home from './pages/Home';
 // import Recibo from './pages/Recibo';
-import Out from './pages/Out';
+// import Out from './pages/Out';
+import Memo from './pages/Memo';
 
 const App: React.FC = () => (
   <>
     {/* <Home /> */}
     {/* <Recibo /> */}
-    <Out />
+    <Memo />
     <GlobalStyle />
   </>
 );

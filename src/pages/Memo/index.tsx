@@ -78,6 +78,7 @@ const Memo: React.FC = () => {
 
   useEffect(() => {
     if (pathname) {
+      console.log('pathname', pathname);
       const groupS = pathname.split('/').reverse()[0];
       handleShowGroup(groupS);
     }

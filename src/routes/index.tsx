@@ -1,16 +1,11 @@
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from '../pages/Home';
 
-import Route from './Route';
-
-import ReciboPage from '../pages/Recibo';
-import MemoPage from '../pages/Memo';
-
-const Routes: React.FC = () => (
-  <Switch>
-    <Route path="/receipt" component={ReciboPage} />
-    <Route component={MemoPage} />
-  </Switch>
+const AppRoutes: React.FC = () => (
+  <Routes>
+    <Route path="/" element={<HomePage />} />
+  </Routes>
 );
 
-export default Routes;
+export default AppRoutes;

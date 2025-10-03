@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaStar, FaCross } from 'react-icons/fa';
 
 const BACKGROUND_IMAGE_URL = '/assets/background.jpg';
@@ -23,6 +23,8 @@ export default function MemorialHero({
   tagline = 'Born to be alive',
   backgroundImage = BACKGROUND_IMAGE_URL,
 }) {
+  const [playing, setPlaying] = useState(false);
+
   const params = [
     'rel=0',
     'modestbranding=1',
@@ -32,10 +34,11 @@ export default function MemorialHero({
     'iv_load_policy=3', // hide annotations
     'playsinline=1',
     'autoplay=1',
-    'mute=1',
+    // 'mute=1',
   ].join('&');
 
   const videoSrc = `https://www.youtube.com/embed/${youtubeId}?${params}`;
+  const poster = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
 
   return (
     <section
@@ -64,7 +67,7 @@ export default function MemorialHero({
           style={{ maxHeight: '360px' }}
         >
           <div
-            className="relative w-full h-0 pb-[56.25%] rounded-3xl overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.6)]"
+            className="relative w-full h-0 pb-[56.25%] rounded-3xl overflow-hidden"
             style={{
               boxShadow:
                 '0 0 40px rgba(255,255,255,0.12), 0 30px 80px rgba(0,0,0,0.75)',
@@ -72,60 +75,59 @@ export default function MemorialHero({
               background: '#0b0c10',
             }}
           >
-            {videoSrc && (
+            {!playing ? (
+              <button
+                onClick={() => setPlaying(true)}
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  backgroundImage: `url(${poster})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <span
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: '9999px',
+                    background: 'rgba(0,0,0,0.6)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginLeft: 6,
+                      width: 0,
+                      height: 0,
+                      borderTop: '14px solid transparent',
+                      borderBottom: '14px solid transparent',
+                      borderLeft: '24px solid white',
+                    }}
+                  />
+                </span>
+              </button>
+            ) : (
               <iframe
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 src={videoSrc}
                 title={`${name} memorial video`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen={false}
+                allowFullScreen
                 style={{ border: 'none', zIndex: 0 }}
               />
             )}
-
-            {/* inner border ring */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-3xl"
-              style={{
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.14)',
-                zIndex: 2,
-              }}
-            />
-
-            {/* top matte */}
-            <div
-              aria-hidden
-              className="absolute left-0 right-0 top-0"
-              style={{
-                height: 48,
-                background:
-                  'linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0))',
-                zIndex: 3,
-              }}
-            />
-
-            {/* bottom matte */}
-            <div
-              aria-hidden
-              className="absolute left-0 right-0 bottom-0"
-              style={{
-                height: 64,
-                background:
-                  'linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0))',
-                zIndex: 3,
-              }}
-            />
-
-            {/* vignette */}
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-3xl"
               style={{
                 background:
                   'radial-gradient(140% 90% at 50% 10%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.2) 75%, rgba(0,0,0,0.45) 100%)',
-                zIndex: 2,
               }}
             />
           </div>

@@ -188,10 +188,10 @@ test('empty audio file is rejected before upload', async () => {
 
 test('photo list uses thumbnails and falls back to original with configured bucket', async () => {
   const api = load('src/admin/photoApi.ts', { '../lib/supabase': { albumBucket: 'album', supabase: {
-    rpc: async () => ({ data: [{ id: '1', storage_path: 'one.jpg', thumb_path: 'thumb.jpg' }, { id: '2', storage_path: 'two.jpg' }] }),
+    rpc: async () => ({ data: { rows: [{ id: '1', storage_path: 'one.jpg', thumb_path: 'thumb.jpg' }, { id: '2', storage_path: 'two.jpg' }], total: 2 } }),
     storage: { from: bucket => ({ getPublicUrl: path => ({ data: { publicUrl: `${bucket}/${path}` } }) }) },
   } } })
-  const rows = await api.listPhotos()
+  const { rows } = await api.listPhotos()
   assert.equal(rows[0].thumbSrc, 'album/thumb.jpg')
   assert.equal(rows[0].src, 'album/one.jpg')
   assert.equal(rows[1].thumbSrc, 'album/two.jpg')
@@ -304,4 +304,41 @@ test('public audio sampling makes one bounded RPC and surfaces failure', async (
   assert.equal(result[0].src, 'https://storage/approved/test.mp3')
   fail = true
   await assert.rejects(api.fetchApprovedAudios())
+})
+
+
+test('admin photo pagination issues one request with server filters and preserves totals', async () => {
+  const calls = []
+  const api = load('src/admin/photoApi.ts', { '../lib/supabase': { supabase: {
+    rpc: async (name, args) => { calls.push({ name, args }); return { data: { rows: [], total: 10000, statusCounts: { approved: 10000 }, albumCounts: {}, albumTotals: {} } } },
+  } } })
+  const result = await api.listPhotos(4, 'approved', 'album-id', 'Michel', true)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].name, 'admin_photo_page')
+  assert.equal(calls[0].args.page_number, 4)
+  assert.equal(calls[0].args.filter_album, 'album-id')
+  assert.equal(calls[0].args.search_text, 'Michel')
+  assert.equal(calls[0].args.filter_featured, true)
+  assert.equal(result.total, 10000)
+})
+test('public gallery sends album year search and order to database', async () => {
+  const calls = []
+  const api = load('src/data/gallery.ts', { '../lib/supabase': { supabase: {
+    rpc: async (name, args) => { calls.push({ name, args }); return { data: { rows: [], total: 100, years: [2000], title: 'Família' } } },
+  } } })
+  const result = await api.galleryPhotos('album-id', 3, '2000', 'viagem', true)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].name, 'gallery_photo_page')
+  assert.equal(calls[0].args.capture_year, 2000)
+  assert.equal(calls[0].args.page_number, 3)
+  assert.equal(calls[0].args.oldest_first, true)
+  assert.equal(result.total, 100)
+  await api.galleryAlbums(2, 'Família')
+  assert.equal(calls[1].name, 'gallery_album_page')
+  assert.equal(calls[1].args.page_number, 2)
+})
+test('photo pagination propagates errors rather than displaying partial data', async () => {
+  const dependency = { '../lib/supabase': { supabase: { rpc: async () => ({ error: { message: 'denied' } }) } } }
+  await assert.rejects(load('src/admin/photoApi.ts', dependency).listPhotos())
+  await assert.rejects(load('src/data/gallery.ts', dependency).galleryPhotos('id', 0, '', '', false))
 })

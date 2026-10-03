@@ -54,7 +54,7 @@ export function PhotoPreview() {
             <Link
               href="/fotos"
               aria-label="Ver todas as fotos"
-              className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-ink text-white transition hover:bg-ink/90"
+              className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-ink px-2 text-center text-white transition hover:bg-ink/90"
             >
               <span className="font-serif text-3xl">Ver mais</span>
               <span className="text-sm text-white/80">fotos</span>

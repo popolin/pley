@@ -1,5 +1,16 @@
 # Ativar a administração
 
+## Paginação de fotos
+
+Antes de publicar o frontend atualizado, execute `photo-pagination.sql` no SQL Editor (após `admin-home-photos.sql`, `admins.sql` e `rate-limits.sql`). As funções também estão incluídas em `schema.sql`.
+
+- Administração: 24 fotos por página, com status, álbum, busca por autor/legenda e seleção para a home filtrados no banco. Contadores consideram toda a coleção; seleção em lote vale somente para a página atual.
+- Galeria pública: 12 álbuns por página, ordenados pela foto cadastrada mais recentemente, com até três capas por álbum. Busca por nome de álbum.
+- Dentro do álbum: 24 fotos por página, busca por legenda/descrição, ano de captura em UTC e ordenação por data de captura (ou cadastro quando ausente). Os anos disponíveis consideram todo o álbum.
+- A home continua limitada às sete fotos selecionadas. As novas funções públicas respeitam RLS e retornam somente fotos aprovadas; a consulta administrativa exige administrador ativo.
+
+O lightbox navega pelas fotos da página atual. Ao trocar filtro ou página, a seleção anterior é descartada. As listagens usam offset e desempate por ID; novas inserções durante a navegação podem deslocar os limites das páginas.
+
 ## Amostra de áudios do player
 
 Execute `audio-sample.sql` no SQL Editor antes de publicar o frontend com a fila de áudios. O player mantém até 15 gravações e reabastece em segundo plano quando restam três. A RPC retorna apenas gravações aprovadas, respeita RLS e prioriza áudios não reproduzidos recentemente. Em catálogos pequenos, gravações podem voltar à fila. Uma reprodução confirmada retira o item da fila; pausar e retomar não retira outro item.

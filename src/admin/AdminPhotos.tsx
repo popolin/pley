@@ -1,6 +1,6 @@
 import { MoreHorizontal, X } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { featurePhotos, renamePhotoAlbum, deleteEmptyPhotoAlbum, movePhotos, createPhotoAlbum, listPhotoAlbums, type PhotoAlbum, editPhoto, listPhotos, setPhotoStatus, type AdminPhoto } from './photoApi'
+import { featurePhotos, renamePhotoAlbum, deleteEmptyPhotoAlbum, movePhotos, createPhotoAlbum, listPhotoAlbums, type PhotoPage, type PhotoAlbum, editPhoto, listPhotos, setPhotoStatus, type AdminPhoto } from './photoApi'
 import type { Status } from './store'
 const button = 'cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
 const primaryButton = 'cursor-pointer rounded-lg border border-blue-700 bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50'
@@ -26,6 +26,10 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
   const [notice, setNotice] = useState('')
   const [status, setStatus] = useState<Status>('pending')
   const [search, setSearch] = useState('')
+  const [featuredFilter, setFeaturedFilter] = useState('all')
+  const [page, setPage] = useState(0)
+  const [revision, setRevision] = useState(0)
+  const [summary, setSummary] = useState<Omit<PhotoPage, 'rows'>>({ total: 0, statusCounts: {}, albumCounts: {}, albumTotals: {} })
   const [selected, setSelected] = useState<string[]>([])
   const [editing, setEditing] = useState<AdminPhoto | null>(null)
   const editDialog = useRef<HTMLDialogElement>(null)
@@ -49,23 +53,21 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
 
   useEffect(() => {
     let active = true
-    Promise.allSettled([listPhotos(), listPhotoAlbums()]).then(([photos, loadedAlbums]) => {
-      if (!active) return
-      if (photos.status === 'fulfilled') setRows(photos.value)
-      if (loadedAlbums.status === 'fulfilled') setAlbums(loadedAlbums.value)
-      setError([photos, loadedAlbums].filter((result) => result.status === 'rejected').map((result) => result.reason.message).join(' '))
-      setLoading(false)
-    })
-    return () => { active = false }
-  }, [])
-  async function reload() {
-    setLoading(true); setError(''); setSelected([])
-    const [photos, loadedAlbums] = await Promise.allSettled([listPhotos(), listPhotoAlbums()])
-    setRows(photos.status === 'fulfilled' ? photos.value : [])
-    if (loadedAlbums.status === 'fulfilled') setAlbums(loadedAlbums.value)
-    setError([photos, loadedAlbums].filter((result) => result.status === 'rejected').map((result) => result.reason.message).join(' '))
+    const timer = window.setTimeout(() => {
+      setLoading(true); setError('')
+      Promise.all([listPhotos(page, status, albumFilter, search.trim(), featuredFilter === 'all' ? null : featuredFilter === 'yes'), listPhotoAlbums()]).then(([photos, loadedAlbums]) => {
+        if (!active) return
+        const lastPage = Math.max(0, Math.ceil(photos.total / 24) - 1)
+        if (page > lastPage) { setPage(lastPage); return }
+        setRows(photos.rows); setSummary(photos); setAlbums(loadedAlbums)
+      }).catch((e) => { if (active) { setRows([]); setError(e.message) } })
+        .finally(() => { if (active) setLoading(false) })
+    }, 300)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [page, status, albumFilter, search, featuredFilter, revision])
+  function reload() {
+    setLoading(true); setSelected([]); setRevision((value) => value + 1)
     void onPendingChanged()
-    setLoading(false)
   }
   async function moderate(ids: string[], next: Status) {
     if (busy || !ids.length) return
@@ -73,7 +75,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
     try {
       await setPhotoStatus(ids, next)
       setRows((previous) => previous.map((row) => ids.includes(row.id) ? { ...row, status: next } : row))
-      setSelected([]); setEditing(null); setNotice('Status atualizado.'); void onPendingChanged()
+      setSelected([]); setEditing(null); setNotice('Status atualizado.'); reload()
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível atualizar.') }
     finally { setBusy(false) }
   }
@@ -83,7 +85,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
     try {
       await featurePhotos(ids, show)
       setRows((previous) => previous.map((row) => ids.includes(row.id) ? { ...row, featured: show } : row))
-      setSelected([])
+      reload()
       setNotice(show ? 'Fotos selecionadas para a home. Somente as aprovadas serão exibidas (até 7).' : 'Fotos removidas da home.')
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível atualizar a home.') }
     finally { setBusy(false) }
@@ -99,7 +101,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
     try {
       await editPhoto(editing.id, author, caption, alt, albumId)
       setRows((previous) => previous.map((row) => row.id === editing.id ? { ...row, contributor_name: author, caption, alt, album_id: albumId || null } : row))
-      setEditing(null); setNotice('Foto atualizada.')
+      setEditing(null); setNotice('Foto atualizada.'); reload()
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível salvar.') }
     finally { setBusy(false) }
   }
@@ -114,7 +116,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
     finally { setBusy(false) }
   }
   const activeAlbum = albums.find((album) => album.id === albumFilter)
-  function clearSelection() { setSelected([]); setMoving(false); setEditing(null) }
+  function clearSelection() { setPage(0); setLoading(true); setSelected([]); setMoving(false); setEditing(null) }
   async function renameAlbum(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!activeAlbum || busy || !renameTitle.trim()) return
@@ -142,20 +144,20 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
     try {
       await movePhotos(selected, destination)
       setRows((previous) => previous.map((row) => selected.includes(row.id) ? { ...row, album_id: destination || null } : row))
-      clearSelection(); setNotice('Fotos movidas com sucesso.')
+      clearSelection(); setNotice('Fotos movidas com sucesso.'); reload()
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível mover.') }
     finally { setBusy(false) }
   }
-  const visible = rows.filter((row) => row.status === status && (albumFilter === 'all' || (row.album_id ?? '') === albumFilter) && `${row.contributor_name ?? ''} ${row.caption ?? ''}`.toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR')))
+  const visible = rows
   return <section>
-    <fieldset disabled={busy || loading} className="mb-4 flex flex-wrap gap-2">{(Object.keys(labels) as Status[]).map((value) => <button key={value} aria-pressed={status === value} className={`${button} ${status === value ? 'ring-2 ring-slate-500' : ''}`} onClick={() => { setStatus(value); clearSelection() }}>{labels[value]} <span className="ml-2 tabular-nums">{rows.filter((row) => row.status === value).length}</span></button>)}</fieldset>
+    <fieldset disabled={busy || loading} className="mb-4 flex flex-wrap gap-2">{(Object.keys(labels) as Status[]).map((value) => <button key={value} aria-pressed={status === value} className={`${button} ${status === value ? 'ring-2 ring-slate-500' : ''}`} onClick={() => { setStatus(value); clearSelection() }}>{labels[value]} <span className="ml-2 tabular-nums">{summary.statusCounts[value] ?? 0}</span></button>)}</fieldset>
     <fieldset disabled={busy || loading} className="mb-5">
       <legend className="mb-2 text-xs font-medium text-slate-500">Álbuns</legend>
       <div className="flex flex-wrap gap-2">{[{ id: 'all', title: 'Todos os álbuns' }, { id: '', title: 'Sem álbum' }, ...albums].map((album) => {
         const realAlbum = album.id !== 'all' && album.id !== ''
-        const hasPhotos = rows.some((row) => row.album_id === album.id)
+        const hasPhotos = (summary.albumTotals[album.id] ?? 0) > 0
         return <div key={album.id} className={`relative flex items-center rounded-lg border ${albumFilter === album.id ? 'border-slate-500 bg-slate-200/60 text-ink' : 'border-slate-200 bg-white text-slate-600'}`} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setAlbumMenu(null) }} onKeyDown={(e) => { if (e.key === 'Escape') { setAlbumMenu(null); e.currentTarget.querySelector<HTMLButtonElement>('[aria-expanded]')?.focus() } }}>
-          <button className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100" aria-pressed={albumFilter === album.id} onClick={() => { setAlbumFilter(album.id); setAlbumMenu(null); clearSelection(); setRenaming(false); setConfirmDelete(false) }}>{album.title} <span className="ml-1 text-xs tabular-nums">{rows.filter((row) => row.status === status && (album.id === 'all' || (row.album_id ?? '') === album.id)).length}</span></button>
+          <button className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100" aria-pressed={albumFilter === album.id} onClick={() => { setAlbumFilter(album.id); setAlbumMenu(null); clearSelection(); setRenaming(false); setConfirmDelete(false) }}>{album.title} <span className="ml-1 text-xs tabular-nums">{album.id === 'all' ? (summary.statusCounts[status] ?? 0) : (summary.albumCounts[album.id] ?? 0)}</span></button>
           {realAlbum && <>
             <button type="button" aria-label={`Opções do álbum ${album.title}`} title="Opções do álbum" aria-expanded={albumMenu === album.id} aria-controls={`album-actions-${album.id}`} className="mr-1 inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-slate-500 hover:bg-slate-200 hover:text-ink" onClick={() => setAlbumMenu(albumMenu === album.id ? null : album.id)}><MoreHorizontal aria-hidden className="size-4" /></button>
             {albumMenu === album.id && <div id={`album-actions-${album.id}`} className="absolute top-full left-0 z-20 mt-1 w-48 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
@@ -169,7 +171,8 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
       {renaming && activeAlbum && <form onSubmit={renameAlbum} className="mt-3 flex flex-wrap items-end gap-2"><label className="text-sm">Novo nome<input autoFocus className={field} value={renameTitle} onChange={(e) => setRenameTitle(e.target.value)} required maxLength={100} /></label><button className={button} disabled={!renameTitle.trim()}>Salvar nome</button><button type="button" className={button} onClick={() => setRenaming(false)}>Cancelar</button></form>}
       {confirmDelete && activeAlbum && <div className="mt-3 rounded-lg bg-slate-50 p-3"><p className="mb-2 text-sm">Excluir o álbum “{activeAlbum.title}”?</p><button className={button} onClick={() => void removeAlbum()}>Confirmar exclusão</button> <button className={button} onClick={() => setConfirmDelete(false)}>Cancelar</button></div>}
     </fieldset>
-    <div className="mb-5 flex items-end gap-3"><label className="flex-1 text-sm">Buscar<input className={field} value={search} disabled={busy || loading} placeholder="Nome ou legenda" onChange={(e) => { setSearch(e.target.value); clearSelection() }} /></label><button className={button} disabled={busy || loading || !!editing} onClick={() => void reload()}>Atualizar</button></div>
+    <div className="mb-5 flex items-end gap-3"><label className="flex-1 text-sm">Buscar<input className={field} maxLength={300} value={search} disabled={busy} placeholder="Nome ou legenda" onChange={(e) => { setSearch(e.target.value); clearSelection() }} /></label><button className={button} disabled={busy || loading || !!editing} onClick={() => void reload()}>Atualizar</button></div>
+    <label className="mb-4 block text-sm">Destaque na home<select className={`${field} max-w-xs cursor-pointer`} value={featuredFilter} disabled={busy} onChange={(e) => { setFeaturedFilter(e.target.value); clearSelection() }}><option value="all">Todas as fotos</option><option value="yes">Selecionadas para a home</option><option value="no">Fora da home</option></select></label>
     {error && <p role="alert" className="mb-3 text-sm text-red-700">{error}</p>}<p role="status" className="mb-3 text-sm text-green-800">{notice}</p>
     {editing && <dialog ref={editDialog} aria-labelledby="photo-edit-title" onClose={closeEditor} onCancel={(event) => { if (busy) event.preventDefault() }} onClick={(event) => { if (event.target === event.currentTarget) closeEditor() }} className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl bg-white p-0 text-ink shadow-2xl backdrop:bg-ink/55 backdrop:backdrop-blur-sm">
       <div className="p-5 sm:p-6">
@@ -185,7 +188,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
       </div>
     </dialog>}
     {loading ? <p role="status">Carregando fotos…</p> : <fieldset disabled={busy} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" disabled={!visible.length || busy} checked={visible.length > 0 && selected.length === visible.length} ref={(node) => { if (node) node.indeterminate = selected.length > 0 && selected.length < visible.length }} onChange={(e) => setSelected(e.target.checked ? visible.map((row) => row.id) : [])} />{selected.length ? `${selected.length} selecionado(s)` : `${visible.length} foto(s)`}</label>{selected.length > 0 && <div className="flex flex-wrap gap-2"><button className={button} onClick={() => { setMoving(true); setDestination('') }}>Mover selecionadas</button><button className={button} onClick={() => void setFeatured(selected, true)}>Exibir na home</button><button className={button} onClick={() => void setFeatured(selected, false)}>Retirar da home</button>{(Object.keys(labels) as Status[]).filter((value) => value !== status && value !== 'pending').map((value) => <button key={value} className={button} onClick={() => void moderate(selected, value)}>{value === 'approved' ? 'Aprovar' : 'Reprovar'} selecionados</button>)}</div>}</div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" disabled={!visible.length || busy} checked={visible.length > 0 && selected.length === visible.length} ref={(node) => { if (node) node.indeterminate = selected.length > 0 && selected.length < visible.length }} onChange={(e) => setSelected(e.target.checked ? visible.map((row) => row.id) : [])} />{selected.length ? `${selected.length} selecionado(s)` : `${visible.length} nesta página · ${summary.total} foto(s)`}</label>{selected.length > 0 && <div className="flex flex-wrap gap-2"><button className={button} onClick={() => { setMoving(true); setDestination('') }}>Mover selecionadas</button><button className={button} onClick={() => void setFeatured(selected, true)}>Exibir na home</button><button className={button} onClick={() => void setFeatured(selected, false)}>Retirar da home</button>{(Object.keys(labels) as Status[]).filter((value) => value !== status && value !== 'pending').map((value) => <button key={value} className={button} onClick={() => void moderate(selected, value)}>{value === 'approved' ? 'Aprovar' : 'Reprovar'} selecionados</button>)}</div>}</div>
       {moving && selected.length > 0 && <div className="flex flex-wrap items-end gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="text-sm">Álbum de destino<select className={`${field} cursor-pointer`} value={destination} onChange={(e) => setDestination(e.target.value)}><option value="">Sem álbum</option>{albumOptions.map((album) => <option key={album.id} value={album.id}>{album.title}</option>)}</select></label><button className={button} disabled={selected.length > 500} onClick={() => void moveSelected()}>Mover {selected.length} foto(s)</button><button className={button} onClick={() => setMoving(false)}>Cancelar</button>{selected.length > 500 && <p className="text-sm">Selecione até 500 fotos por vez.</p>}</div>}
       <ul className="grid grid-cols-1 gap-4 bg-slate-50 p-4 sm:grid-cols-2 xl:grid-cols-3">{visible.map((row) => <li key={row.id} className={`flex min-w-0 flex-col overflow-hidden rounded-xl border bg-white transition-shadow ${selected.includes(row.id) ? 'border-slate-500 ring-2 ring-slate-400' : 'border-slate-200 hover:shadow-md'}`}>
         <div className="relative bg-slate-100">
@@ -210,5 +213,10 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
       </li>)}</ul>
       {!visible.length && <p className="p-8 text-center text-sm text-slate-500">Nenhuma foto encontrada para os filtros selecionados.</p>}
     </fieldset>}
+    <div className="mt-4 flex items-center justify-between gap-3">
+      <button className={button} disabled={busy || loading || !!error || page === 0} onClick={() => { setPage(page - 1); setSelected([]); setMoving(false); setLoading(true) }}>Anterior</button>
+      <span className="text-sm">Página {page + 1} de {Math.max(1, Math.ceil(summary.total / 24))}</span>
+      <button className={button} disabled={busy || loading || !!error || (page + 1) * 24 >= summary.total} onClick={() => { setPage(page + 1); setSelected([]); setMoving(false); setLoading(true) }}>Próxima</button>
+    </div>
   </section>
 }

@@ -20,13 +20,22 @@ export function Footer() {
             <p className="mt-1 max-w-xs font-serif text-sm text-ink-soft">{site.tagline}</p>
           </div>
         </div>
-        <a
+        <div className="flex shrink-0 flex-col items-center gap-2 md:items-start">
+          <a
           href="mailto:micpopolin@gmail.com"
           className="inline-flex shrink-0 items-center gap-2 text-sm text-ink-soft underline-offset-4 hover:underline"
         >
           <Mail size={17} aria-hidden="true" />
           micpopolin@gmail.com
-        </a>
+          </a>
+          <a
+            href="mailto:marcilio.jrmendes@gmail.com"
+            className="inline-flex items-center gap-2 text-sm text-ink-soft underline-offset-4 hover:underline"
+          >
+            <Mail size={17} aria-hidden="true" />
+            marcilio.jrmendes@gmail.com
+          </a>
+        </div>
       </div>
     </footer>
   )

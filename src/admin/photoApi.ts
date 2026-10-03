@@ -18,16 +18,21 @@ function client() {
   if (!supabase) throw new Error('Supabase não configurado.')
   return supabase
 }
-export async function listPhotos(): Promise<AdminPhoto[]> {
+export interface PhotoPage {
+  rows: AdminPhoto[]
+  total: number
+  statusCounts: Partial<Record<Status, number>>
+  albumCounts: Record<string, number>
+  albumTotals: Record<string, number>
+}
+export async function listPhotos(page = 0, status: Status = 'pending', album = 'all', search = '', featured: boolean | null = null): Promise<PhotoPage> {
   const db = client()
-  const rows: AdminPhoto[] = []
-  for (let offset = 0; ; offset += 500) {
-    const { data, error } = await db.rpc('admin_list_photos', { page_offset: offset })
-    if (error) throw new Error(`Não foi possível carregar as fotos: ${error.message} (código ${error.code}).`)
-    const page = data as AdminPhoto[]
-    rows.push(...page.map((row) => ({ ...row, thumbSrc: db.storage.from(albumBucket).getPublicUrl(row.thumb_path || row.storage_path).data.publicUrl, src: db.storage.from(albumBucket).getPublicUrl(row.storage_path).data.publicUrl })))
-    if (page.length < 500) return rows
-  }
+  const { data, error } = await db.rpc('admin_photo_page', {
+    page_number: page, filter_status: status, filter_album: album, search_text: search, filter_featured: featured,
+  })
+  if (error) throw new Error(`Não foi possível carregar as fotos: ${error.message}`)
+  const result = data as PhotoPage
+  return { ...result, statusCounts: result.statusCounts ?? {}, albumCounts: result.albumCounts ?? {}, albumTotals: result.albumTotals ?? {}, rows: result.rows.map((row) => ({ ...row, thumbSrc: db.storage.from(albumBucket).getPublicUrl(row.thumb_path || row.storage_path).data.publicUrl, src: db.storage.from(albumBucket).getPublicUrl(row.storage_path).data.publicUrl })) }
 }
 export async function editPhoto(id: string, author: string, caption: string, alt: string, albumId: string) {
   const { error } = await client().rpc('admin_edit_photo', { photo_id: id, author_name: author.trim(), photo_caption: caption.trim(), photo_alt: alt.trim(), selected_album: albumId || null })

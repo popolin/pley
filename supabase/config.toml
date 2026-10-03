@@ -1,0 +1,7 @@
+[functions.manage-admin]
+# The function verifies the bearer token with Auth.getUser and checks admins.status.
+verify_jwt = false
+
+[functions.submit-publication]
+# Public submission endpoint, with service-only database quota reservation.
+verify_jwt = false

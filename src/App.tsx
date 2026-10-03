@@ -1,13 +1,25 @@
-import React from 'react';
-import './index.css';
-import { BrowserRouter } from 'react-router-dom';
+import { lazy, Suspense, useState } from 'react'
+import { ContributeModal } from './components/ContributeModal'
+import { Header } from './components/Header'
+import { usePath } from './lib/router'
+import { Gallery } from './pages/Gallery'
+import { Home } from './pages/Home'
+const AdminModule = lazy(() => import('./admin/AdminModule').then((module) => ({ default: module.AdminModule })))
 
-import Routes from './routes';
+export default function App() {
+  const [contributeOpen, setContributeOpen] = useState(false)
+  const path = usePath()
+  const isGallery = path === '/fotos' || path.startsWith('/fotos/')
 
-const App: React.FC = () => (
-  <BrowserRouter>
-    <Routes />
-  </BrowserRouter>
-);
+  if (path === '/login' || path === '/admin' || path.startsWith('/admin/')) {
+    return <Suspense fallback={<p role="status" className="container-page py-20">Carregando…</p>}><AdminModule path={path} /></Suspense>
+  }
 
-export default App;
+  return (
+    <>
+      <Header isHome={!isGallery} onContribute={() => setContributeOpen(true)} />
+      {isGallery ? <Gallery path={path} /> : <Home />}
+      <ContributeModal open={contributeOpen} onClose={() => setContributeOpen(false)} />
+    </>
+  )
+}

@@ -3,7 +3,6 @@ import { Lightbox } from '../components/Lightbox'
 import { Link } from '../components/Link'
 import { Photo } from '../components/Photo'
 import { PillButton } from '../components/PillButton'
-import { photos as placeholders, totalPhotos } from '../data/mock'
 import { useAlbumPhotos } from '../hooks/useAlbumPhotos'
 
 // Per-tile spans. Mobile: 2 columns. md+: 6 columns, two rows.
@@ -18,12 +17,10 @@ const layout = [
 ]
 
 export function PhotoPreview() {
-  const { photos: album } = useAlbumPhotos()
+  const { photos: album } = useAlbumPhotos(true)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const shown = album.slice(0, layout.length)
-  // Real photos first; remaining tiles keep the neutral placeholders.
-  const photos = [...shown, ...placeholders.slice(shown.length)].slice(0, layout.length)
-  const extra = album.length ? Math.max(album.length - layout.length, 0) : totalPhotos
+  const photos = shown
 
   return (
     <section id="fotos" className="py-12 sm:py-16">
@@ -53,13 +50,13 @@ export function PhotoPreview() {
               <Photo key={photo.id} photo={photo} className={`rounded-2xl ${layout[i] ?? ''}`} />
             ),
           )}
-          {extra > 0 && (
+          {photos.length > 0 && (
             <Link
               href="/fotos"
-              aria-label={`Ver mais ${extra} fotos`}
+              aria-label="Ver todas as fotos"
               className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-ink text-white transition hover:bg-ink/90"
             >
-              <span className="font-serif text-3xl">+{extra}</span>
+              <span className="font-serif text-3xl">Ver mais</span>
               <span className="text-sm text-white/80">fotos</span>
             </Link>
           )}

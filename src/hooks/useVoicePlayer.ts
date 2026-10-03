@@ -18,7 +18,7 @@ function pickRandom(pool: VoiceMemory[], excludeId: string | null) {
 }
 
 // Each play starts a random memory, never the one just played. Without a src (mock data) playback is simulated.
-export function useVoicePlayer(memories: VoiceMemory[]) {
+export function useVoicePlayer(memories: VoiceMemory[], consume: (id: string) => void) {
   const [current, setCurrent] = useState<VoiceMemory | null>(null)
   const [playId, setPlayId] = useState(0)
   const [playing, setPlaying] = useState(false)
@@ -69,12 +69,13 @@ export function useVoicePlayer(memories: VoiceMemory[]) {
     audio.onplaying = () => {
       if (countedRef.current) return
       countedRef.current = true
+      consume(current.id)
       markPlayed(current.id)
       void recordAudioPlay(current.id)
     }
     audio.src = current.src
     audio.play().catch(finish)
-  }, [current, finish, markPlayed])
+  }, [current, finish, markPlayed, consume])
 
   useEffect(
     () => () => {
@@ -103,10 +104,11 @@ export function useVoicePlayer(memories: VoiceMemory[]) {
     setCurrent(next)
     setPlayId((n) => n + 1)
     if (!next.src) {
+      consume(next.id)
       markPlayed(next.id)
       setPlaying(true)
     }
-  }, [current, memories, finish, markPlayed])
+  }, [current, memories, finish, markPlayed, consume])
 
   const total = (current?.src ? realDuration || current.durationSeconds : current?.durationSeconds) || 1
   const needsAttention = !playing && (current

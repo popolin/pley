@@ -1,6 +1,7 @@
 import { albumBucket, supabase } from '../lib/supabase'
 import type { Status } from './store'
 export interface AdminPhoto {
+  featured?: boolean
   id: string
   contributor_name: string | null
   caption: string | null
@@ -69,5 +70,10 @@ export async function deleteEmptyPhotoAlbum(id: string) {
 }
 export async function movePhotos(ids: string[], albumId: string) {
   const { error } = await client().rpc('admin_move_photos', { photo_ids: ids, target_album: albumId || null })
+  if (error) throw new Error(error.message)
+}
+
+export async function featurePhotos(ids: string[], show: boolean) {
+  const { error } = await client().rpc('admin_feature_photos', { photo_ids: ids, show_on_home: show })
   if (error) throw new Error(error.message)
 }

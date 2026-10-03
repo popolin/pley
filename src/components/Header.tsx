@@ -4,7 +4,6 @@ import { site } from '../data/mock'
 import { useActiveSection } from '../hooks/useActiveSection'
 import { useVoiceMemories } from '../hooks/useVoiceMemories'
 import { useVoicePlayer } from '../hooks/useVoicePlayer'
-import type { VoiceMemory } from '../types'
 import { Avatar } from './Avatar'
 import { Logo } from './Logo'
 
@@ -15,8 +14,9 @@ const links = [
 ]
 const sectionIds = links.map((l) => l.id)
 
-function VoiceButton({ memories }: { memories: VoiceMemory[] }) {
-  const { current, playId, playing, needsAttention, progress, toggle } = useVoicePlayer(memories)
+function VoiceButton() {
+  const { memories, consume } = useVoiceMemories()
+  const { current, playId, playing, needsAttention, progress, toggle } = useVoicePlayer(memories, consume)
   const [hiddenPlayId, setHiddenPlayId] = useState(0)
   const hasInfo = Boolean(current?.contributorName || current?.caption)
   const showToast = hasInfo && hiddenPlayId !== playId
@@ -26,6 +26,8 @@ function VoiceButton({ memories }: { memories: VoiceMemory[] }) {
     const id = setTimeout(() => setHiddenPlayId(playId), 4500)
     return () => clearTimeout(id)
   }, [showToast, playId])
+
+  if (!memories.length && !current) return null
 
   return (
     <div className="relative">
@@ -85,7 +87,6 @@ export function Header({ isHome, onContribute }: { isHome: boolean; onContribute
   // Section anchors live on the home page; elsewhere they point back to it.
   const active = isHome ? sectionActive : 'fotos'
   const base = isHome ? '' : '/'
-  const memories = useVoiceMemories()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -133,7 +134,7 @@ export function Header({ isHome, onContribute }: { isHome: boolean; onContribute
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {memories.length > 0 && <VoiceButton memories={memories} />}
+          <VoiceButton />
           <button
             type="button"
             onClick={onContribute}

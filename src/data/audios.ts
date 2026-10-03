@@ -55,19 +55,17 @@ export async function submitAudio({ file, name, caption }: SubmitAudioInput) {
   await sendPublication(form)
 }
 
-// Approved audios only (enforced by RLS). Returns [] on any failure.
-export async function fetchApprovedAudios(): Promise<VoiceMemory[]> {
+// A bounded sample; recent recordings are deprioritized by the database.
+export async function fetchApprovedAudios(excludedIds: string[] = [], recentIds: string[] = []): Promise<VoiceMemory[]> {
   if (!supabase) return []
-  const { data, error } = await supabase
-    .from('audios')
-    .select('*')
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false })
-    .limit(100)
-  if (error || !data) return []
+  const { data, error } = await supabase.rpc('sample_approved_audios', {
+    excluded_ids: excludedIds.slice(0, 15), recent_ids: recentIds.slice(0, 30),
+  })
+  if (error) throw new Error('Não foi possível carregar os áudios.')
+  if (!data) return []
 
   const storage = supabase.storage.from(audioBucket)
-  return data.map((row) => ({
+  return data.map((row: { id: string; duration_seconds: number | null; play_count: number | null; contributor_name: string | null; caption: string | null; storage_path: string }) => ({
     id: row.id,
     durationSeconds: row.duration_seconds ?? 0,
     playCount: row.play_count ?? 0,

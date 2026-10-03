@@ -284,3 +284,24 @@ test('message administration surfaces authorization failures', async () => {
   await assert.rejects(api.setMessageStatus(['id'], 'rejected'))
   await assert.rejects(api.pendingMessageCount())
 })
+
+test('public audio sampling makes one bounded RPC and surfaces failure', async () => {
+  const calls = []
+  let fail = false
+  const supabase = {
+    rpc: async (name, args) => {
+      calls.push({ name, args })
+      return { data: [{ id: 'audio', storage_path: 'approved/test.mp3', duration_seconds: 12 }], error: fail ? new Error('network') : null }
+    },
+    storage: { from: () => ({ getPublicUrl: (path) => ({ data: { publicUrl: `https://storage/${path}` } }) }) },
+  }
+  const api = load('src/data/audios.ts', { '../lib/supabase': { supabase }, '../lib/submission': {} })
+  const result = await api.fetchApprovedAudios(Array.from({ length: 100 }, (_, i) => String(i)), Array.from({ length: 100 }, (_, i) => String(i)))
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].name, 'sample_approved_audios')
+  assert.equal(calls[0].args.excluded_ids.length, 15)
+  assert.equal(calls[0].args.recent_ids.length, 30)
+  assert.equal(result[0].src, 'https://storage/approved/test.mp3')
+  fail = true
+  await assert.rejects(api.fetchApprovedAudios())
+})

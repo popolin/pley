@@ -1,6 +1,6 @@
 import { MoreHorizontal, X } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { renamePhotoAlbum, deleteEmptyPhotoAlbum, movePhotos, createPhotoAlbum, listPhotoAlbums, type PhotoAlbum, editPhoto, listPhotos, setPhotoStatus, type AdminPhoto } from './photoApi'
+import { featurePhotos, renamePhotoAlbum, deleteEmptyPhotoAlbum, movePhotos, createPhotoAlbum, listPhotoAlbums, type PhotoAlbum, editPhoto, listPhotos, setPhotoStatus, type AdminPhoto } from './photoApi'
 import type { Status } from './store'
 const button = 'cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
 const primaryButton = 'cursor-pointer rounded-lg border border-blue-700 bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50'
@@ -75,6 +75,17 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
       setRows((previous) => previous.map((row) => ids.includes(row.id) ? { ...row, status: next } : row))
       setSelected([]); setEditing(null); setNotice('Status atualizado.'); void onPendingChanged()
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível atualizar.') }
+    finally { setBusy(false) }
+  }
+  async function setFeatured(ids: string[], show: boolean) {
+    if (busy || !ids.length) return
+    setBusy(true); setError(''); setNotice('')
+    try {
+      await featurePhotos(ids, show)
+      setRows((previous) => previous.map((row) => ids.includes(row.id) ? { ...row, featured: show } : row))
+      setSelected([])
+      setNotice(show ? 'Fotos selecionadas para a home. Somente as aprovadas serão exibidas (até 7).' : 'Fotos removidas da home.')
+    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível atualizar a home.') }
     finally { setBusy(false) }
   }
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -174,7 +185,7 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
       </div>
     </dialog>}
     {loading ? <p role="status">Carregando fotos…</p> : <fieldset disabled={busy} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" disabled={!visible.length || busy} checked={visible.length > 0 && selected.length === visible.length} ref={(node) => { if (node) node.indeterminate = selected.length > 0 && selected.length < visible.length }} onChange={(e) => setSelected(e.target.checked ? visible.map((row) => row.id) : [])} />{selected.length ? `${selected.length} selecionado(s)` : `${visible.length} foto(s)`}</label>{selected.length > 0 && <div className="flex flex-wrap gap-2"><button className={button} onClick={() => { setMoving(true); setDestination('') }}>Mover selecionadas</button>{(Object.keys(labels) as Status[]).filter((value) => value !== status && value !== 'pending').map((value) => <button key={value} className={button} onClick={() => void moderate(selected, value)}>{value === 'approved' ? 'Aprovar' : 'Reprovar'} selecionados</button>)}</div>}</div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" disabled={!visible.length || busy} checked={visible.length > 0 && selected.length === visible.length} ref={(node) => { if (node) node.indeterminate = selected.length > 0 && selected.length < visible.length }} onChange={(e) => setSelected(e.target.checked ? visible.map((row) => row.id) : [])} />{selected.length ? `${selected.length} selecionado(s)` : `${visible.length} foto(s)`}</label>{selected.length > 0 && <div className="flex flex-wrap gap-2"><button className={button} onClick={() => { setMoving(true); setDestination('') }}>Mover selecionadas</button><button className={button} onClick={() => void setFeatured(selected, true)}>Exibir na home</button><button className={button} onClick={() => void setFeatured(selected, false)}>Retirar da home</button>{(Object.keys(labels) as Status[]).filter((value) => value !== status && value !== 'pending').map((value) => <button key={value} className={button} onClick={() => void moderate(selected, value)}>{value === 'approved' ? 'Aprovar' : 'Reprovar'} selecionados</button>)}</div>}</div>
       {moving && selected.length > 0 && <div className="flex flex-wrap items-end gap-3 border-b border-slate-200 bg-slate-50 p-4"><label className="text-sm">Álbum de destino<select className={`${field} cursor-pointer`} value={destination} onChange={(e) => setDestination(e.target.value)}><option value="">Sem álbum</option>{albumOptions.map((album) => <option key={album.id} value={album.id}>{album.title}</option>)}</select></label><button className={button} disabled={selected.length > 500} onClick={() => void moveSelected()}>Mover {selected.length} foto(s)</button><button className={button} onClick={() => setMoving(false)}>Cancelar</button>{selected.length > 500 && <p className="text-sm">Selecione até 500 fotos por vez.</p>}</div>}
       <ul className="grid grid-cols-1 gap-4 bg-slate-50 p-4 sm:grid-cols-2 xl:grid-cols-3">{visible.map((row) => <li key={row.id} className={`flex min-w-0 flex-col overflow-hidden rounded-xl border bg-white transition-shadow ${selected.includes(row.id) ? 'border-slate-500 ring-2 ring-slate-400' : 'border-slate-200 hover:shadow-md'}`}>
         <div className="relative bg-slate-100">
@@ -186,11 +197,13 @@ export function AdminPhotos({ onPendingChanged }: { onPendingChanged: () => Prom
           </label>
         </div>
         <div className="flex flex-1 flex-col p-3">
+          {row.featured && <span className="mb-2 self-start rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">Home{row.status !== 'approved' ? ' · aguardando aprovação' : ''}</span>}
           <p className="break-words text-sm font-medium">{row.contributor_name || 'Autor não informado'}</p>
           <p className="mt-1 break-words text-xs text-slate-500">{new Date(row.created_at).toLocaleDateString('pt-BR')} · {albums.find((album) => album.id === row.album_id)?.title || 'Sem álbum'}</p>
           <p className="my-3 whitespace-pre-wrap break-words text-sm text-slate-600">{row.caption || 'Sem legenda'}</p>
           <div className="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-3">
             <button className={button} onClick={() => { setEditing(row); setAlbumId(row.album_id ?? ''); setCreatingAlbum(false); setError(''); setNotice('') }}>Editar</button>
+            <button className={button} onClick={() => void setFeatured([row.id], !row.featured)}>{row.featured ? 'Retirar da home' : 'Exibir na home'}</button>
             {(Object.keys(labels) as Status[]).filter((value) => value !== row.status && value !== 'pending').map((value) => <button key={value} className={button} onClick={() => void moderate([row.id], value)}>{value === 'approved' ? 'Aprovar' : 'Reprovar'}</button>)}
           </div>
         </div>

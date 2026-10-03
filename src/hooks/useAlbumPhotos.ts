@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { fetchApprovedPhotos } from '../data/photos'
 import type { Photo } from '../types'
 
-export function useAlbumPhotos() {
+export function useAlbumPhotos(homeOnly = false) {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    fetchApprovedPhotos().then((result) => {
+    fetchApprovedPhotos(homeOnly).then((result) => {
       if (cancelled) return
       setPhotos(result)
       setLoading(false)
@@ -16,7 +16,7 @@ export function useAlbumPhotos() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [homeOnly])
 
   return { photos, loading }
 }

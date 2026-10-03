@@ -584,3 +584,29 @@ grant execute on function public.admin_list_messages(integer) to authenticated;
 grant execute on function public.admin_edit_message(uuid, text, text, text) to authenticated;
 grant execute on function public.admin_set_message_status(uuid[], text) to authenticated;
 grant execute on function public.admin_pending_message_count() to authenticated;
+-- Run after schema.sql, admins.sql and rate-limits.sql. Re-runnable.
+alter table public.photos add column if not exists featured boolean not null default false;
+create index if not exists photos_featured_idx on public.photos (created_at desc, id) where featured and status = 'approved';
+
+create or replace function public.admin_feature_photos(photo_ids uuid[], show_on_home boolean)
+returns void language plpgsql security definer set search_path = '' as $$
+begin
+  if not public.is_active_admin() then raise exception 'Acesso administrativo negado.' using errcode = '42501'; end if;
+  perform private.consume_limit('admin-rpc:' || auth.uid()::text, 120, 60);
+  if show_on_home is null or coalesce(cardinality(photo_ids), 0) not between 1 and 500 then raise exception 'Selecione entre 1 e 500 fotos.'; end if;
+  if exists (select 1 from unnest(photo_ids) as selected(id) where not exists (select 1 from public.photos where id = selected.id)) then raise exception 'Foto não encontrada. Atualize a lista.'; end if;
+  update public.photos set featured = show_on_home where id = any(photo_ids);
+end;
+$$;
+revoke all on function public.admin_feature_photos(uuid[], boolean) from public, anon, authenticated;
+grant execute on function public.admin_feature_photos(uuid[], boolean) to authenticated;
+-- Bounded public sample. Only approved recordings are returned.
+create or replace function public.sample_approved_audios(excluded_ids uuid[] default '{}', recent_ids uuid[] default '{}')
+returns setof public.audios language sql security invoker set search_path = '' as $$
+  select a.* from public.audios a
+  where a.status = 'approved' and not (a.id = any(coalesce(excluded_ids[1:15], '{}'::uuid[])))
+  order by (a.id = any(coalesce(recent_ids[1:30], '{}'::uuid[]))), random()
+  limit 15;
+$$;
+revoke all on function public.sample_approved_audios(uuid[], uuid[]) from public;
+grant execute on function public.sample_approved_audios(uuid[], uuid[]) to anon, authenticated;

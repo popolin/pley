@@ -6,14 +6,17 @@ import type { Album, Photo, PhotoTone } from '../types'
 const tones: PhotoTone[] = ['dawn', 'earth', 'sage', 'mist', 'lake', 'sand', 'dusk']
 
 // Approved photos only (enforced by RLS), newest first. Returns [] on any failure.
-export async function fetchApprovedPhotos(): Promise<Photo[]> {
+export async function fetchApprovedPhotos(homeOnly = false): Promise<Photo[]> {
   if (!supabase) return []
-  const { data, error } = await supabase
+  let query = supabase
     .from('photos')
     .select('*')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
-    .limit(200)
+    .order('id')
+    .limit(homeOnly ? 7 : 200)
+  if (homeOnly) query = query.eq('featured', true)
+  const { data, error } = await query
   if (error || !data) return []
 
   const storage = supabase.storage.from(albumBucket)

@@ -1,5 +1,15 @@
 # Ativar a administração
 
+## Amostra de áudios do player
+
+Execute `audio-sample.sql` no SQL Editor antes de publicar o frontend com a fila de áudios. O player mantém até 15 gravações e reabastece em segundo plano quando restam três. A RPC retorna apenas gravações aprovadas, respeita RLS e prioriza áudios não reproduzidos recentemente. Em catálogos pequenos, gravações podem voltar à fila. Uma reprodução confirmada retira o item da fila; pausar e retomar não retira outro item.
+
+## Fotos da página inicial
+
+Execute `admin-home-photos.sql` após `admins.sql` e `rate-limits.sql` para habilitar a seleção de fotos da home em um banco existente. A estrutura também está incluída em `schema.sql`.
+
+No painel de fotos, use “Exibir na home” ou “Retirar da home”, individualmente ou com várias fotos selecionadas. Só fotos aprovadas e marcadas aparecem na home. O mosaico mostra até sete; se houver mais, são escolhidas as sete com cadastro mais recente. Nenhuma foto é marcada automaticamente ao aplicar a migração. Os álbuns continuam exibindo as fotos aprovadas normalmente.
+
 O login e a gestão de administradores usam Supabase Auth + `public.admins`.
 Mensagens, fotos, álbuns, áudios, administradores e autenticação usam dados reais. Nenhuma senha é armazenada em `public.admins`.
 

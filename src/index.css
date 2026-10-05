@@ -99,27 +99,26 @@
 }
 
 @layer components {
-  /* 24.6 seconds at rest, followed by a 0.4-second attention wiggle. */
+  /* The hook handles the 15-second wait; each animation lasts 0.6 seconds. */
   @media (prefers-reduced-motion: no-preference) {
-    .voice-player[data-attention]:not(:hover):not(:focus-within):not(:active) {
-      animation: voice-nudge 25s ease-in-out infinite;
+    .voice-player[data-animating] {
+      animation: voice-nudge 0.6s ease-in-out;
     }
-    .voice-player[data-attention]:not(:hover):not(:focus-within):not(:active) .voice-waveform {
-      animation: voice-pulse 25s ease-in-out infinite;
+    .voice-player[data-animating] .voice-waveform {
+      animation: voice-pulse 0.6s ease-in-out;
       transform-origin: center;
     }
   }
   @keyframes voice-nudge {
-    0%, 98.4%, 100% { transform: translateX(0) scale(1); }
-    98.624%, 99.088% { transform: translateX(-3px) rotate(-1deg) scale(1.03); }
-    98.864%, 99.312% { transform: translateX(3px) rotate(1deg) scale(1.03); }
-    99.536% { transform: translateX(-2px) scale(1.02); }
-    99.776% { transform: translateX(1px) scale(1.01); }
+    0%, 100% { transform: translateX(0) scale(1); }
+    8%, 24%, 40%, 56%, 72% { transform: translateX(-3.5px) rotate(-0.6deg) scale(1.02); }
+    16%, 32%, 48%, 64%, 80% { transform: translateX(3.5px) rotate(0.6deg) scale(1.02); }
+    88% { transform: translateX(-1.5px) scale(1.01); }
+    94% { transform: translateX(0.75px) scale(1.005); }
   }
   @keyframes voice-pulse {
-    0%, 98.4%, 100% { transform: scale(1); }
-    98.864%, 99.536% { transform: scale(1.2); }
-    99.2% { transform: scale(1); }
+    0%, 50%, 100% { transform: scale(1); }
+    25%, 75% { transform: scale(1.1); }
   }
   .container-page {
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;

@@ -2,6 +2,8 @@ import { Mail } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { site } from '../data/mock'
 
+const contactEmails = ['micpopolin@gmail.com', 'marcilio.jrmendes@gmail.com']
+
 export function Footer() {
   return (
     <footer className="bg-cream-50 py-6 sm:py-7">
@@ -21,20 +23,16 @@ export function Footer() {
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-center gap-2 md:items-start">
-          <a
-          href="mailto:micpopolin@gmail.com"
-          className="inline-flex shrink-0 items-center gap-2 text-sm text-ink-soft underline-offset-4 hover:underline"
-        >
-          <Mail size={17} aria-hidden="true" />
-          micpopolin@gmail.com
-          </a>
-          <a
-            href="mailto:marcilio.jrmendes@gmail.com"
-            className="inline-flex items-center gap-2 text-sm text-ink-soft underline-offset-4 hover:underline"
-          >
-            <Mail size={17} aria-hidden="true" />
-            marcilio.jrmendes@gmail.com
-          </a>
+          {contactEmails.map((email) => (
+            <a
+              key={email}
+              href={`mailto:${email}`}
+              className="inline-flex items-center gap-2 text-sm text-ink-soft underline-offset-4 hover:underline"
+            >
+              <Mail size={17} aria-hidden="true" />
+              {email}
+            </a>
+          ))}
         </div>
       </div>
     </footer>

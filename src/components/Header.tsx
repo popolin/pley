@@ -1,4 +1,4 @@
-import { AudioLines, Menu, Pause, Plus, X } from 'lucide-react'
+import { AudioLines, Menu, Monitor, Pause, Plus, Smartphone, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { site } from '../data/mock'
 import { useActiveSection } from '../hooks/useActiveSection'
@@ -6,6 +6,8 @@ import { useVoiceMemories } from '../hooks/useVoiceMemories'
 import { useVoicePlayer } from '../hooks/useVoicePlayer'
 import { Avatar } from './Avatar'
 import { Logo } from './Logo'
+import { usePlayerAttention } from '../hooks/usePlayerAttention'
+import { useDesktopView } from '../hooks/useDesktopView'
 
 const links = [
   { id: 'inicio', label: 'Início' },
@@ -56,13 +58,14 @@ function VoiceButtonBody({
   progress: number
   toggle: () => void
 }) {
+  const attentionRef = usePlayerAttention(needsAttention && !playing)
   return (
     <button
       type="button"
       onClick={toggle}
       aria-label={playing ? 'Pausar a voz do Pley' : 'Ouvir a voz do Pley'}
       aria-pressed={playing}
-      data-attention={needsAttention || undefined}
+      ref={attentionRef}
       className="voice-player relative flex h-10 cursor-pointer items-center gap-1.5 overflow-hidden rounded-full bg-white/20 pr-3 pl-1 backdrop-blur-sm transition hover:bg-white/30 md:h-11"
     >
       <Avatar src={site.avatar} className="size-8 md:size-10" />
@@ -82,6 +85,7 @@ function VoiceButtonBody({
 
 export function Header({ isHome, onContribute }: { isHome: boolean; onContribute: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { desktopView, setDesktopView, buttonScale } = useDesktopView()
   const [scrolled, setScrolled] = useState(false)
   const sectionActive = useActiveSection(sectionIds)
   // Section anchors live on the home page; elsewhere they point back to it.
@@ -99,6 +103,7 @@ export function Header({ isHome, onContribute }: { isHome: boolean; onContribute
   const showPhoto = scrolled || menuOpen || !isHome
 
   return (
+    <>
     <header className="fixed inset-x-0 top-0 z-40 text-white">
       <div
         aria-hidden
@@ -176,9 +181,31 @@ export function Header({ isHome, onContribute }: { isHome: boolean; onContribute
                 </a>
               </li>
             ))}
+            <li>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); setDesktopView(true) }}
+                className="flex w-full cursor-pointer items-center gap-2 py-3.5 text-left text-white/80 hover:text-white"
+              >
+                <Monitor aria-hidden className="size-5" />
+                Ver versão desktop
+              </button>
+            </li>
           </ul>
         </nav>
       )}
     </header>
+    {desktopView && (
+      <button
+        type="button"
+        onClick={() => setDesktopView(false)}
+        style={{ right: 16 * buttonScale, bottom: 16 * buttonScale, transform: `scale(${buttonScale})`, transformOrigin: 'bottom right' }}
+        className="fixed z-50 inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/30 bg-ink px-4 py-3 text-sm font-medium text-white shadow-lg hover:bg-ink-soft"
+      >
+        <Smartphone aria-hidden className="size-5" />
+        Voltar ao modo mobile
+      </button>
+    )}
+    </>
   )
 }

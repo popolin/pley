@@ -31,7 +31,7 @@ function AlbumCover({ photos }: { photos: Photo[] }) {
       {shown.map((p, i) => (
         <div
           key={p.id}
-          className={`absolute rounded-[2px] bg-white px-1.5 pt-1.5 pb-6 shadow-[0_6px_18px_-6px_rgb(27_36_51/0.45)] transition-transform duration-500 ${slots[i]}`}
+          className={`absolute rounded-[2px] bg-white px-1 pt-1 pb-3 sm:px-1.5 sm:pt-1.5 sm:pb-5 shadow-[0_6px_18px_-6px_rgb(27_36_51/0.45)] transition-transform duration-500 ${slots[i]}`}
         >
           <div className="aspect-square overflow-hidden bg-cream-200">
             <img src={thumb(p)} alt="" loading="lazy" className="size-full object-cover" />
@@ -45,7 +45,7 @@ function AlbumCover({ photos }: { photos: Photo[] }) {
 function AlbumList({ groups, loading }: { groups: GalleryAlbum[]; loading: boolean }) {
   if (loading) {
     return (
-      <ul className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+      <ul className="mt-8 grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4" aria-hidden>
         {[0, 1, 2].map((i) => (
           <li key={i} className="aspect-[5/4] animate-pulse rounded-2xl bg-cream-200" />
         ))}
@@ -55,12 +55,12 @@ function AlbumList({ groups, loading }: { groups: GalleryAlbum[]; loading: boole
   if (groups.length === 0) return <p className="mt-10 text-ink-soft">Ainda não há álbuns.</p>
 
   return (
-    <ul className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="mt-8 grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-5 md:grid-cols-3 lg:grid-cols-4">
       {groups.map((g) => (
         <li key={g.id}>
           <Link href={`/fotos/${g.id}`} className="group block">
             <AlbumCover photos={g.photos} />
-            <h2 className="mt-3 font-serif text-lg leading-snug font-semibold">{g.title}</h2>
+            <h2 className="mt-3 break-words font-serif text-base leading-snug font-semibold sm:text-lg">{g.title}</h2>
             <p className="text-sm text-ink-muted">
               {g.total} {g.total === 1 ? 'foto' : 'fotos'}
             </p>
@@ -85,7 +85,7 @@ function GalleryContent({ albumId }: { albumId?: string }) {
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
-  const size = albumId ? 24 : 12
+  const size = 24
   useEffect(() => {
     let active = true
     const timer = window.setTimeout(() => {

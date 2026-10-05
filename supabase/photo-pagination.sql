@@ -64,7 +64,7 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
     where p.status='approved' and (coalesce(search_text,'')='' or strpos(lower(coalesce(a.title,'Outras fotos')), lower(left(search_text,100))) > 0)
     group by p.album_id,a.title,a.description
   ), page as (
-    select * from groups order by latest desc,id limit 12 offset (least(greatest(coalesce(page_number,0),0),1000000)::bigint*12)
+    select * from groups order by latest desc,id limit 24 offset (least(greatest(coalesce(page_number,0),0),1000000)::bigint*24)
   ) select jsonb_build_object('total',(select count(*) from groups),'rows',coalesce((
     select jsonb_agg(to_jsonb(g) || jsonb_build_object('photos',(
       select coalesce(jsonb_agg(to_jsonb(cover)),'[]'::jsonb) from (

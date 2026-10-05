@@ -5,7 +5,7 @@
 Antes de publicar o frontend atualizado, execute `photo-pagination.sql` no SQL Editor (após `admin-home-photos.sql`, `admins.sql` e `rate-limits.sql`). As funções também estão incluídas em `schema.sql`.
 
 - Administração: 24 fotos por página, com status, álbum, busca por autor/legenda e seleção para a home filtrados no banco. Contadores consideram toda a coleção; seleção em lote vale somente para a página atual.
-- Galeria pública: 12 álbuns por página, ordenados pela foto cadastrada mais recentemente, com até três capas por álbum. Busca por nome de álbum.
+- Galeria pública: 24 álbuns por página, ordenados pela foto cadastrada mais recentemente, com até três capas por álbum. Busca por nome de álbum.
 - Dentro do álbum: 24 fotos por página, busca por legenda/descrição, ano de captura em UTC e ordenação por data de captura (ou cadastro quando ausente). Os anos disponíveis consideram todo o álbum.
 - A home continua limitada às sete fotos selecionadas. As novas funções públicas respeitam RLS e retornam somente fotos aprovadas; a consulta administrativa exige administrador ativo.
 
